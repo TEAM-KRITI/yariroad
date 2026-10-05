@@ -8,86 +8,393 @@ import config
 from fonts import style
 from helpers import get_image, log
 
-HELP_ORDER = ["nohashtags", "nopromo", "nophone", "noforward", "nostylish", "biomode",
-              "linkfilter", "abuse", "echo", "edit", "mediadelete", "msgdelete"]
-LABELS = {"nohashtags": "# NOHASHTAGS"}
+
+# =========================================================
+# HELP ORDER
+# =========================================================
+
+HELP_ORDER = [
+    "nohashtags",
+    "nopromo",
+    "nophone",
+    "noforward",
+    "nostylish",
+    "biomode",
+    "linkfilter",
+    "abuse",
+    "echo",
+    "edit",
+    "mediadelete",
+    "msgdelete",
+]
+
+
+# =========================================================
+# HELP BUTTON LABELS
+# =========================================================
+
+LABELS = {
+    "nohashtags": "ɴᴏ ʜᴀꜱʜᴛᴀɢꜱ",
+    "nopromo": "ɴᴏ ᴘʀᴏᴍᴏ",
+    "nophone": "ɴᴏ ᴘʜᴏɴᴇ",
+    "noforward": "ɴᴏ ꜰᴏʀᴡᴀʀᴅ",
+    "nostylish": "ɴᴏ ꜱᴛʏʟɪꜱʜ",
+    "biomode": "ʙɪᴏ ᴍᴏᴅᴇ",
+    "linkfilter": "ʟɪɴᴋ ꜰɪʟᴛᴇʀ",
+    "abuse": "ᴀʙᴜꜱᴇ",
+    "echo": "ᴇᴄʜᴏ",
+    "edit": "ᴇᴅɪᴛ",
+    "mediadelete": "ᴍᴇᴅɪᴀ ᴅᴇʟᴇᴛᴇ",
+    "msgdelete": "ᴍᴇꜱꜱᴀɢᴇ ᴅᴇʟᴇᴛᴇ",
+}
+
+
 HTML = ParseMode.HTML
 
 
-def btn(label, **kw):
-    return InlineKeyboardButton(style(label), **kw)
+# =========================================================
+# BUTTON
+# =========================================================
 
+def btn(label, **kwargs):
+    """
+    Create a Telegram inline button
+    with the configured stylish font.
+    """
+
+    return InlineKeyboardButton(
+        text=style(str(label)),
+        **kwargs
+    )
+
+
+# =========================================================
+# START TEXT
+# =========================================================
 
 def start_text(name):
-    return style(config.START_TEXT).format(name=html.escape(name))
+    """
+    Create styled start message.
+    """
 
+    safe_name = html.escape(
+        name or "User"
+    )
+
+    return style(
+        config.START_TEXT
+    ).format(
+        name=safe_name
+    )
+
+
+# =========================================================
+# START KEYBOARD
+# =========================================================
 
 def start_kb(bot_username):
+
     return InlineKeyboardMarkup([
-        [btn("UPDATE CHANNEL ↗", url=config.UPDATE_CHANNEL_URL),
-         btn("UPDATE GROUP ↗", url=config.UPDATE_GROUP_URL)],
-        [btn("HELP & COMMANDS", callback_data="help")],
-        [btn("ADD ME TO YOUR GROUP +",
-             url=f"https://t.me/{bot_username}?startgroup=true&admin=delete_messages+restrict_members")],
+        [
+            btn(
+                "ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ ↗",
+                url=config.UPDATE_CHANNEL_URL,
+            ),
+            btn(
+                "ᴜᴘᴅᴀᴛᴇ ɢʀᴏᴜᴘ ↗",
+                url=config.UPDATE_GROUP_URL,
+            ),
+        ],
+
+        [
+            btn(
+                "ʜᴇʟᴘ & ᴄᴏᴍᴍᴀɴᴅꜱ",
+                callback_data="help",
+            ),
+        ],
+
+        [
+            btn(
+                "ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ +",
+                url=(
+                    f"https://t.me/{bot_username}"
+                    "?startgroup=true"
+                    "&admin=delete_messages+restrict_members"
+                ),
+            ),
+        ],
     ])
 
 
+# =========================================================
+# HELP KEYBOARD
+# =========================================================
+
 def help_kb():
-    btns = [btn(LABELS.get(n, n.upper()), callback_data=f"h:{n}") for n in HELP_ORDER]
-    rows = [btns[i:i + 2] for i in range(0, len(btns), 2)]
-    rows.append([btn("PURGE", callback_data="h:purge")])
-    rows.append([btn("BACK", callback_data="start")])
+
+    buttons = []
+
+    for module in HELP_ORDER:
+
+        label = LABELS.get(module)
+
+        if not label:
+            label = module.replace(
+                "_",
+                " "
+            )
+
+        buttons.append(
+            btn(
+                label,
+                callback_data=f"h:{module}",
+            )
+        )
+
+    # Two buttons per row
+    rows = [
+        buttons[i:i + 2]
+        for i in range(
+            0,
+            len(buttons),
+            2
+        )
+    ]
+
+    # Purge button
+    rows.append([
+        btn(
+            "ᴘᴜʀɢᴇ",
+            callback_data="h:purge",
+        )
+    ])
+
+    # Back button
+    rows.append([
+        btn(
+            "ʙᴀᴄᴋ",
+            callback_data="start",
+        )
+    ])
+
     return InlineKeyboardMarkup(rows)
 
 
+# =========================================================
+# SEND PANEL
+# =========================================================
+
 async def send_panel(message, text, kb):
-    """Send text with the bot photo on top (if one is set)."""
-    img = get_image()
-    if img:
+    """
+    Send panel with bot image.
+    If image sending fails, send text instead.
+    """
+
+    image = get_image()
+
+    if image:
+
         try:
-            return await message.reply_photo(img, caption=text, parse_mode=HTML, reply_markup=kb)
+
+            return await message.reply_photo(
+                photo=image,
+                caption=text,
+                parse_mode=HTML,
+                reply_markup=kb,
+            )
+
         except Exception as e:
-            log.warning("photo failed, sending text only: %s", e)
-    return await message.reply_text(text, parse_mode=HTML, reply_markup=kb)
+
+            log.warning(
+                "photo failed, sending text only: %s",
+                e,
+            )
+
+    return await message.reply_text(
+        text,
+        parse_mode=HTML,
+        reply_markup=kb,
+    )
 
 
-async def show(q, text, kb):
-    """Edit the panel in place (caption if it has a photo, text otherwise)."""
+# =========================================================
+# SHOW / EDIT PANEL
+# =========================================================
+
+async def show(query, text, kb):
+    """
+    Edit an existing photo caption
+    or normal text message.
+    """
+
     try:
-        if q.message.photo:
-            await q.edit_message_caption(caption=text, parse_mode=HTML, reply_markup=kb)
-        else:
-            await q.edit_message_text(text, parse_mode=HTML, reply_markup=kb)
-    except Exception as e:
-        log.warning("edit failed: %s", e)
 
+        if query.message.photo:
+
+            await query.edit_message_caption(
+                caption=text,
+                parse_mode=HTML,
+                reply_markup=kb,
+            )
+
+        else:
+
+            await query.edit_message_text(
+                text=text,
+                parse_mode=HTML,
+                reply_markup=kb,
+            )
+
+    except Exception as e:
+
+        log.warning(
+            "edit failed: %s",
+            e,
+        )
+
+
+# =========================================================
+# /START
+# =========================================================
 
 async def start(update, context):
+
+    # Start only works in private chat
     if update.effective_chat.type != "private":
         return
-    await send_panel(update.message, start_text(update.effective_user.first_name), start_kb(context.bot.username))
 
+    name = (
+        update.effective_user.first_name
+        or "User"
+    )
+
+    await send_panel(
+        update.message,
+        start_text(name),
+        start_kb(
+            context.bot.username
+        ),
+    )
+
+
+# =========================================================
+# /HELP
+# =========================================================
 
 async def help_cmd(update, context):
-    await send_panel(update.message, style(config.HELP_TEXT), help_kb())
 
+    await send_panel(
+        update.message,
+        style(config.HELP_TEXT),
+        help_kb(),
+    )
+
+
+# =========================================================
+# CALLBACK BUTTONS
+# =========================================================
 
 async def buttons(update, context):
-    import plugins
-    q = update.callback_query
-    await q.answer()
-    d = q.data
-    if d == "start":
-        await show(q, start_text(q.from_user.first_name), start_kb(context.bot.username))
-    elif d == "help":
-        await show(q, style(config.HELP_TEXT), help_kb())
-    elif d.startswith("h:"):
-        mod = plugins.ALL.get(d[2:])
-        if mod:
-            await show(q, style(mod.HELP), InlineKeyboardMarkup([[btn("BACK", callback_data="help")]]))
 
+    import plugins
+
+    query = update.callback_query
+
+    await query.answer()
+
+    data = query.data
+
+    # -----------------------------------------------------
+    # BACK TO START
+    # -----------------------------------------------------
+
+    if data == "start":
+
+        await show(
+            query,
+            start_text(
+                query.from_user.first_name
+            ),
+            start_kb(
+                context.bot.username
+            ),
+        )
+
+        return
+
+    # -----------------------------------------------------
+    # HELP MENU
+    # -----------------------------------------------------
+
+    if data == "help":
+
+        await show(
+            query,
+            style(config.HELP_TEXT),
+            help_kb(),
+        )
+
+        return
+
+    # -----------------------------------------------------
+    # MODULE HELP
+    # -----------------------------------------------------
+
+    if data.startswith("h:"):
+
+        module_name = data[2:]
+
+        module = plugins.ALL.get(
+            module_name
+        )
+
+        if module:
+
+            help_text = getattr(
+                module,
+                "HELP",
+                "ʜᴇʟᴘ ɪɴꜰᴏʀᴍᴀᴛɪᴏɴ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ.",
+            )
+
+            await show(
+                query,
+                style(help_text),
+                InlineKeyboardMarkup([
+                    [
+                        btn(
+                            "ʙᴀᴄᴋ",
+                            callback_data="help",
+                        )
+                    ]
+                ]),
+            )
+
+
+# =========================================================
+# REGISTER HANDLERS
+# =========================================================
 
 def register(app):
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_cmd))
-    app.add_handler(CallbackQueryHandler(buttons))
+
+    # /start
+    app.add_handler(
+        CommandHandler(
+            "start",
+            start,
+        )
+    )
+
+    # /help
+    app.add_handler(
+        CommandHandler(
+            "help",
+            help_cmd,
+        )
+    )
+
+    # Inline buttons
+    app.add_handler(
+        CallbackQueryHandler(
+            buttons,
+        )
+    )
