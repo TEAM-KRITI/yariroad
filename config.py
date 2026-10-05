@@ -1,0 +1,32 @@
+"""All settings live here. Values come from environment variables (Heroku Config Vars / .env)."""
+import os
+
+# ---- required ----
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+
+# ---- database (optional; without it a local data.json is used) ----
+MONGO_URI = os.getenv("MONGO_URI", "")
+DB_NAME = os.getenv("DB_NAME", "meowguard")
+
+# ---- font / photo ----
+FONT_STYLE = os.getenv("FONT_STYLE", "smallcaps")                # "smallcaps" or "off"
+OWNER_ID = int(os.getenv("OWNER_ID", "0") or 0)                  # your Telegram user id (for /setimage)
+START_IMAGE = os.getenv("START_IMAGE", "")                       # image URL or file_id (optional, /setimage overrides)
+
+# ---- /start buttons ----
+UPDATE_CHANNEL_URL = os.getenv("UPDATE_CHANNEL_URL", "https://t.me/telegram")
+UPDATE_GROUP_URL = os.getenv("UPDATE_GROUP_URL", "https://t.me/telegram")
+
+# ---- behaviour tuning ----
+WARN_DELETE_AFTER = int(os.getenv("WARN_DELETE_AFTER", "5"))     # seconds before warning msg disappears
+ADMIN_CACHE_TTL = int(os.getenv("ADMIN_CACHE_TTL", "60"))        # seconds to cache admin check
+BIO_CACHE_TTL = int(os.getenv("BIO_CACHE_TTL", "600"))           # seconds to cache user bio
+STYLISH_MIN_CHARS = int(os.getenv("STYLISH_MIN_CHARS", "3"))     # fancy chars needed to trigger nostylish
+DEFAULT_BAD_WORDS = [w for w in os.getenv("DEFAULT_BAD_WORDS", "fuck,bitch,bastard,slut,asshole").split(",") if w]
+
+# ---- texts ----
+START_TEXT = ("🛡 Hello {name}! 👋\n\nI'm your group's security bot keeping chats clean and safe.\n\n"
+              "📣 Stay informed with instant alerts.\n✅ Add me now and I'll start protecting your group!\n\n"
+              "<i>Make me admin with 'Delete messages' permission.</i>")
+HELP_TEXT = ("📚 <b>BOT COMMAND HELP</b>\n\nHere you'll find details for all available plugins and features.\n\n"
+             "👇 Tap the buttons below to view help for each module.")
