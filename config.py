@@ -6,16 +6,16 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 
 # ---- database (optional; without it a local data.json is used) ----
 MONGO_URI = os.getenv("MONGO_URI", "")
-DB_NAME = os.getenv("DB_NAME", "meowguard")
+DB_NAME = os.getenv("DB_NAME", "kirti")
 
 # ---- font / photo ----
 FONT_STYLE = os.getenv("FONT_STYLE", "smallcaps")                # "smallcaps" or "off"
 OWNER_ID = int(os.getenv("OWNER_ID", "0") or 0)                  # your Telegram user id (for /setimage)
-START_IMAGE = os.getenv("START_IMAGE", "")                       # image URL or file_id (optional, /setimage overrides)
+START_IMAGE = os.getenv("START_IMAGE", "https://files.catbox.moe/x5lytj.jpg")                       # image URL or file_id (optional, /setimage overrides)
 
 # ---- /start buttons ----
-UPDATE_CHANNEL_URL = os.getenv("UPDATE_CHANNEL_URL", "https://t.me/telegram")
-UPDATE_GROUP_URL = os.getenv("UPDATE_GROUP_URL", "https://t.me/telegram")
+UPDATE_CHANNEL_URL = os.getenv("UPDATE_CHANNEL_URL", "https://t.me/kirti_bots")
+UPDATE_GROUP_URL = os.getenv("UPDATE_GROUP_URL", "https://t.me/kirti_bots_support")
 
 # ---- behaviour tuning ----
 WARN_DELETE_AFTER = int(os.getenv("WARN_DELETE_AFTER", "5"))     # seconds before warning msg disappears
