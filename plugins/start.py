@@ -97,11 +97,11 @@ def start_kb(bot_username):
     return InlineKeyboardMarkup([
         [
             btn(
-                "ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ ↗",
+                "ᴜᴘᴅᴀᴛᴇ↗",
                 url=config.UPDATE_CHANNEL_URL,
             ),
             btn(
-                "ᴜᴘᴅᴀᴛᴇ ɢʀᴏᴜᴘ ↗",
+                "ᴜᴘᴅᴀᴛᴇ ɢʀᴏᴜp",
                 url=config.UPDATE_GROUP_URL,
             ),
         ],
